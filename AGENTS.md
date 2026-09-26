@@ -1,10 +1,7 @@
 <!-- LOVABLE:BEGIN -->
 > [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
+> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting published git history.
 <!-- LOVABLE:END -->
+
+- Use deterministic local demo data for all rainfall, risk, routing, and emergency information so the public dashboard works without credentials.
+- Keep the 3D terrain isolated to the client-only `/inundation` route because WebGL cannot render during server-side rendering.
