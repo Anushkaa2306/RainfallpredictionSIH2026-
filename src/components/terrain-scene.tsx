@@ -6,7 +6,7 @@ import * as THREE from "three";
 function Terrain({ level }: { level: number }) {
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(20, 15, 42, 34);
-    const positions = geo.attributes.position;
+    const positions = geo.getAttribute("position");
     for (let i = 0; i < positions.count; i += 1) {
       const x = positions.getX(i);
       const y = positions.getY(i);
@@ -19,7 +19,7 @@ function Terrain({ level }: { level: number }) {
     return geo;
   }, []);
 
-  const buildings = [
+  const buildings: Array<[number, number, number]> = [
     [-5, 1.1, -2], [-3, 0.8, -3.4], [1.2, 0.7, -2.6], [3.6, 1, -1.3],
     [5.4, 0.65, 1.4], [2.6, 0.9, 3.2], [-1.1, 0.75, 3.8], [-4.4, 1.2, 3],
   ];

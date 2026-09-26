@@ -4,6 +4,19 @@ import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "../components/button";
 
+const metrics = [
+  { icon: CloudRain, label: "Rainfall now", value: "28", unit: "mm/hr", note: "↑ 12 in 30 min", tone: "text-primary" },
+  { icon: Waves, label: "Flood probability", value: "84", unit: "%", note: "Critical", tone: "text-critical" },
+  { icon: Droplets, label: "Peak depth", value: "1.2", unit: "m", note: "Expected 17:45", tone: "text-warning" },
+  { icon: Wind, label: "Storm movement", value: "18", unit: "km/h", note: "North-east", tone: "text-safe" },
+];
+
+const services = [
+  { icon: School, name: "NGV Emergency Shelter", meta: "1.8 km · 142 spaces", tone: "text-safe" },
+  { icon: Hospital, name: "St. John’s Hospital", meta: "2.4 km · ER open", tone: "text-primary" },
+  { icon: Radio, name: "BBMP Control Room", meta: "1916 · 24 hours", tone: "text-warning" },
+];
+
 const rainfall = [
   { t: "Now", actual: 28, forecast: 28 }, { t: "+1h", actual: null, forecast: 42 }, { t: "+2h", actual: null, forecast: 58 },
   { t: "+3h", actual: null, forecast: 46 }, { t: "+4h", actual: null, forecast: 31 }, { t: "+5h", actual: null, forecast: 18 }, { t: "+6h", actual: null, forecast: 11 },
@@ -50,12 +63,7 @@ function Dashboard() {
     </section>
 
     <div className="mb-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
-      {[
-        [CloudRain, "Rainfall now", "28", "mm/hr", "↑ 12 in 30 min", "text-primary"],
-        [Waves, "Flood probability", "84", "%", "Critical", "text-critical"],
-        [Droplets, "Peak depth", "1.2", "m", "Expected 17:45", "text-warning"],
-        [Wind, "Storm movement", "18", "km/h", "North-east", "text-safe"],
-      ].map(([Icon, label, value, unit, note, tone]) => <div key={String(label)} className="rounded-lg border border-border bg-card p-4"><div className="flex items-center justify-between text-xs text-muted-foreground"><span>{label as string}</span><Icon className={`size-4 ${tone}`} /></div><div className="mt-3 flex items-end gap-1"><strong className="font-display text-3xl">{value as string}</strong><span className="mb-1 text-xs text-muted-foreground">{unit as string}</span></div><div className={`mt-2 text-xs ${tone}`}>{note as string}</div></div>)}
+      {metrics.map(({ icon: Icon, label, value, unit, note, tone }) => <div key={label} className="rounded-lg border border-border bg-card p-4"><div className="flex items-center justify-between text-xs text-muted-foreground"><span>{label}</span><Icon className={`size-4 ${tone}`} /></div><div className="mt-3 flex items-end gap-1"><strong className="font-display text-3xl">{value}</strong><span className="mb-1 text-xs text-muted-foreground">{unit}</span></div><div className={`mt-2 text-xs ${tone}`}>{note}</div></div>)}
     </div>
 
     <div className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
@@ -77,7 +85,7 @@ function Dashboard() {
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.55fr_1fr]">
       <Panel title="Monitored zones" detail="Predicted maximum within 3 hours"><div className="overflow-x-auto"><table className="w-full min-w-[580px] text-left text-sm"><thead className="bg-secondary/60 text-[10px] uppercase text-muted-foreground"><tr><th className="px-4 py-2">Area</th><th>Risk</th><th>Flood chance</th><th>Peak depth</th><th></th></tr></thead><tbody>{zones.map((zone) => <tr key={zone.name} className="border-t border-border"><td className="px-4 py-3 font-medium">{zone.name}</td><td><span className={`rounded-sm px-2 py-1 text-[10px] font-bold ${zone.risk === "Critical" ? "bg-critical/15 text-critical" : zone.risk === "High" ? "bg-warning/15 text-warning" : zone.risk === "Moderate" ? "bg-primary/15 text-primary" : "bg-safe/15 text-safe"}`}>{zone.risk}</span></td><td>{zone.chance}</td><td>{zone.level}</td><td><Link to="/inundation" className="text-primary"><ArrowRight className="size-4" /></Link></td></tr>)}</tbody></table></div></Panel>
-      <Panel title="Nearby critical services" detail="Verified availability"><div className="divide-y divide-border">{[[School,"NGV Emergency Shelter","1.8 km · 142 spaces","text-safe"],[Hospital,"St. John’s Hospital","2.4 km · ER open","text-primary"],[Radio,"BBMP Control Room","1916 · 24 hours","text-warning"]].map(([Icon,name,meta,tone]) => <div key={String(name)} className="flex items-center gap-3 p-4"><span className="grid size-9 place-items-center rounded-md bg-secondary"><Icon className={`size-4 ${tone}`} /></span><div><div className="text-sm font-medium">{name as string}</div><div className="text-xs text-muted-foreground">{meta as string}</div></div></div>)}</div></Panel>
+      <Panel title="Nearby critical services" detail="Verified availability"><div className="divide-y divide-border">{services.map(({ icon: Icon, name, meta, tone }) => <div key={name} className="flex items-center gap-3 p-4"><span className="grid size-9 place-items-center rounded-md bg-secondary"><Icon className={`size-4 ${tone}`} /></span><div><div className="text-sm font-medium">{name}</div><div className="text-xs text-muted-foreground">{meta}</div></div></div>)}</div></Panel>
     </div>
   </div>;
 }

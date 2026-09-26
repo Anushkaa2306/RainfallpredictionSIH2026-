@@ -23,9 +23,16 @@ const timeline = [
   { hour: "+4h", depth: "0.88 m", affected: "3.3 km²" }, { hour: "+6h", depth: "0.36 m", affected: "1.4 km²" },
 ];
 
+const fallbackPoint = { hour: "Now", depth: "0.42 m", affected: "1.8 km²" };
+const infrastructure = [
+  { icon: Building2, label: "Residential buildings", count: "312", note: "47 critical" },
+  { icon: School, label: "Schools & shelters", count: "6", note: "2 inaccessible" },
+  { icon: Droplets, label: "Stormwater drains", count: "18", note: "11 overloaded" },
+];
+
 function InundationPage() {
   const [timeIndex, setTimeIndex] = useState(3);
-  const point = timeline[timeIndex];
+  const point = timeline[timeIndex] ?? fallbackPoint;
   return <div className="p-4 md:p-6">
     <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><Link to="/" className="mb-3 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" />Risk overview</Link><h1 className="font-display text-2xl font-semibold md:text-3xl">Inundation prediction</h1><p className="mt-1 text-sm text-muted-foreground">Koramangala basin · AI terrain model · 10 m resolution</p></div><div className="flex gap-2"><Button variant="secondary"><Maximize2 className="size-4" />Expand view</Button><Button><Navigation className="size-4" />Plan route</Button></div></div>
 
@@ -38,7 +45,7 @@ function InundationPage() {
       <div className="space-y-5">
         <section className="rounded-lg border border-border bg-card p-4"><div className="flex items-center gap-2"><Clock3 className="size-4 text-primary" /><h2 className="font-display text-sm font-semibold">Forecast time</h2></div><div className="mt-4 text-center"><strong className="font-display text-4xl">{point.hour}</strong><p className="mt-1 text-xs text-muted-foreground">Saturday · {timeIndex === 0 ? "16:20" : `${16 + timeIndex}:20`}</p></div><input className="mt-5 w-full accent-[var(--primary)]" type="range" min="0" max="5" value={timeIndex} onChange={(event) => setTimeIndex(Number(event.target.value))}/><div className="mt-2 flex justify-between text-[9px] text-muted-foreground"><span>NOW</span><span>+3H</span><span>+6H</span></div></section>
         <section className="rounded-lg border border-critical/40 bg-critical/10 p-4"><div className="flex gap-3"><TriangleAlert className="size-5 shrink-0 text-critical"/><div><h2 className="text-sm font-semibold">312 buildings at risk</h2><p className="mt-1 text-xs text-muted-foreground">47 are projected to experience water above ground-floor threshold.</p></div></div></section>
-        <section className="rounded-lg border border-border bg-card"><header className="border-b border-border px-4 py-3"><h2 className="font-display text-sm font-semibold">Affected infrastructure</h2></header><div className="divide-y divide-border">{[[Building2,"Residential buildings","312","47 critical"],[School,"Schools & shelters","6","2 inaccessible"],[Droplets,"Stormwater drains","18","11 overloaded"]].map(([Icon,label,count,note]) => <div key={String(label)} className="flex items-center gap-3 p-4"><span className="grid size-8 place-items-center rounded-md bg-secondary"><Icon className="size-4 text-primary"/></span><div className="min-w-0 flex-1"><div className="text-xs font-medium">{label as string}</div><div className="text-[10px] text-muted-foreground">{note as string}</div></div><strong className="font-display text-lg">{count as string}</strong></div>)}</div></section>
+        <section className="rounded-lg border border-border bg-card"><header className="border-b border-border px-4 py-3"><h2 className="font-display text-sm font-semibold">Affected infrastructure</h2></header><div className="divide-y divide-border">{infrastructure.map(({ icon: Icon, label, count, note }) => <div key={label} className="flex items-center gap-3 p-4"><span className="grid size-8 place-items-center rounded-md bg-secondary"><Icon className="size-4 text-primary"/></span><div className="min-w-0 flex-1"><div className="text-xs font-medium">{label}</div><div className="text-[10px] text-muted-foreground">{note}</div></div><strong className="font-display text-lg">{count}</strong></div>)}</div></section>
         <div className="flex gap-2 rounded-md border border-border bg-secondary/50 p-3 text-[11px] text-muted-foreground"><Info className="size-4 shrink-0 text-primary"/><p>Prediction combines terrain, drainage capacity, observed rainfall, radar nowcasts, and historical flood reports. Confidence: 87%.</p></div>
       </div>
     </div>
