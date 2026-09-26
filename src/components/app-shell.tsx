@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 flex h-16 items-center border-b border-border bg-background/95 px-4 backdrop-blur md:px-6">
         <Link to="/" className="flex min-w-0 items-center gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"><CloudRain className="size-5" /></span>
-          <span className="min-w-0"><strong className="block truncate font-display text-sm">FloodWatch AI</strong><span className="block text-[10px] uppercase text-muted-foreground">Urban resilience network</span></span>
+          <span className="min-w-0"><strong className="block truncate font-display text-sm">Varshaa</strong><span className="block text-[10px] uppercase text-muted-foreground">Urban resilience network</span></span>
         </Link>
         <div className="ml-auto flex items-center gap-2">
           <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex"><span className="size-2 rounded-full bg-safe" /> Systems operational</div>
