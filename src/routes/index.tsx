@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowRight, CheckCircle2, CloudRain, Crosshair, Droplets
 import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "../components/button";
+import hero from "../assets/hero.jpg";
 
 const metrics = [
   { icon: CloudRain, label: "Rainfall now", value: "28", unit: "mm/hr", note: "↑ 12 in 30 min", tone: "text-primary" },
@@ -52,6 +53,15 @@ function Dashboard() {
   const toggleLayer = (name: string) => setLayers((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
 
   return <div className="p-4 md:p-6">
+    <section className="relative mb-5 overflow-hidden rounded-lg border border-border">
+      <img src={hero} alt="Aerial view of Bengaluru under heavy monsoon rain at night" width={1920} height={800} className="h-52 w-full object-cover md:h-72" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/10" />
+      <div className="absolute bottom-0 left-0 max-w-2xl p-5 md:p-7">
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">FloodWatch AI · Monsoon 2026</p>
+        <h2 className="mt-2 font-display text-xl font-semibold leading-tight md:text-3xl">Real-time flood intelligence for Bengaluru</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Live rainfall risk, inundation outlooks, and safe-route guidance across the city — updated every minute.</p>
+      </div>
+    </section>
     <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
       <div><div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-critical radar-pulse" />LIVE · Updated 42 seconds ago</div><h1 className="font-display text-2xl font-semibold md:text-3xl">Flood risk overview</h1><p className="mt-1 text-sm text-muted-foreground">Bengaluru Urban District · Saturday, 26 September</p></div>
       <label className="relative block w-full xl:w-80"><MapPin className="absolute left-3 top-2.5 size-4 text-primary" /><select value={area} onChange={(event) => setArea(event.target.value)} className="h-10 w-full appearance-none rounded-md border border-border bg-secondary pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"><option>Koramangala, Bengaluru</option><option>HSR Layout, Bengaluru</option><option>BTM Layout, Bengaluru</option></select></label>
