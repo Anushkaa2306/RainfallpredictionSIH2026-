@@ -1,40 +1,50 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, CheckCircle2, CloudRain, Crosshair, Droplets, Hospital, MapPin, Navigation, Radio, School, ShieldCheck, Waves, Wind } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, ArrowRight, CheckCircle2, CloudRain, Droplets, Hospital, MapPin, Navigation, Radio, School, ShieldCheck, Waves, Wind } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import * as maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "../components/button";
-import hero from "../assets/hero.jpg";
+import hero from "../assets/hero.png";
 
 const metrics = [
-  { icon: CloudRain, label: "Rainfall now", value: "28", unit: "mm/hr", note: "↑ 12 in 30 min", tone: "text-primary" },
-  { icon: Waves, label: "Flood probability", value: "84", unit: "%", note: "Critical", tone: "text-critical" },
-  { icon: Droplets, label: "Peak depth", value: "1.2", unit: "m", note: "Expected 17:45", tone: "text-warning" },
-  { icon: Wind, label: "Storm movement", value: "18", unit: "km/h", note: "North-east", tone: "text-safe" },
+  { icon: CloudRain, label: "Rainfall now", value: "38", unit: "mm/hr", note: "↑ 14 in 30 min", tone: "text-primary" },
+  { icon: Waves, label: "Flood probability", value: "76", unit: "%", note: "High risk", tone: "text-critical" },
+  { icon: Droplets, label: "Peak depth", value: "1.4", unit: "m", note: "Expected 18:15", tone: "text-warning" },
+  { icon: Wind, label: "Storm movement", value: "24", unit: "km/h", note: "Westerly", tone: "text-safe" },
+];
+
+const indiaNetwork = [
+  { region: "Indore", risk: "High", severity: "2.2x", trend: "Rising" },
+  { region: "Bhopal", risk: "Moderate", severity: "1.4x", trend: "Stable" },
+  { region: "Nagpur", risk: "Moderate", severity: "1.1x", trend: "Watch" },
+  { region: "Mumbai", risk: "Low", severity: "0.8x", trend: "Recovering" },
 ];
 
 const services = [
-  { icon: School, name: "NGV Emergency Shelter", meta: "1.8 km · 142 spaces", tone: "text-safe" },
-  { icon: Hospital, name: "St. John’s Hospital", meta: "2.4 km · ER open", tone: "text-primary" },
-  { icon: Radio, name: "BBMP Control Room", meta: "1916 · 24 hours", tone: "text-warning" },
+  { icon: School, name: "Vijay Nagar Shelter", meta: "1.6 km · 168 spaces", tone: "text-safe" },
+  { icon: Hospital, name: "Choithram Hospital", meta: "2.1 km · ER open", tone: "text-primary" },
+  { icon: Radio, name: "Indore Control Room", meta: "1916 · 24 hours", tone: "text-warning" },
 ];
 
 const rainfall = [
-  { t: "Now", actual: 28, forecast: 28 }, { t: "+1h", actual: null, forecast: 42 }, { t: "+2h", actual: null, forecast: 58 },
-  { t: "+3h", actual: null, forecast: 46 }, { t: "+4h", actual: null, forecast: 31 }, { t: "+5h", actual: null, forecast: 18 }, { t: "+6h", actual: null, forecast: 11 },
+  { t: "Now", actual: 38, forecast: 38 }, { t: "+1h", actual: null, forecast: 54 }, { t: "+2h", actual: null, forecast: 68 },
+  { t: "+3h", actual: null, forecast: 61 }, { t: "+4h", actual: null, forecast: 43 }, { t: "+5h", actual: null, forecast: 26 }, { t: "+6h", actual: null, forecast: 18 },
 ];
+
 const zones = [
-  { name: "Koramangala", risk: "Critical", chance: "84%", level: "1.2 m" },
-  { name: "HSR Layout", risk: "High", chance: "68%", level: "0.8 m" },
-  { name: "BTM Layout", risk: "Moderate", chance: "42%", level: "0.4 m" },
-  { name: "Indiranagar", risk: "Low", chance: "18%", level: "< 0.2 m" },
+  { id: "palasia", name: "Palasia", risk: "Critical", chance: "82%", level: "1.3 m", area: "Palasia, Indore", lng: 75.8712, lat: 22.7207 },
+  { id: "vijay-nagar", name: "Vijay Nagar", risk: "High", chance: "71%", level: "0.9 m", area: "Vijay Nagar, Indore", lng: 75.8954, lat: 22.7549 },
+  { id: "rajwada", name: "Rajwada", risk: "Moderate", chance: "49%", level: "0.5 m", area: "Rajwada, Indore", lng: 75.8756, lat: 22.7173 },
+  { id: "annapurna", name: "Annapurna", risk: "Low", chance: "21%", level: "< 0.2 m", area: "Annapurna, Indore", lng: 75.8534, lat: 22.6942 },
 ];
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Live Flood Risk — FloodWatch AI" },
-    { name: "description", content: "Live rainfall, flood probability, warnings, and safe-route guidance for Bengaluru." },
-    { property: "og:title", content: "Live Flood Risk — FloodWatch AI" },
-    { property: "og:description", content: "Live rainfall, flood probability, warnings, and safe-route guidance for Bengaluru." },
+    { title: "FloodWatch AI — India Monsoon Risk" },
+    { name: "description", content: "Live rainfall, flood probability, warnings, and safe-route guidance for Indore and the wider India resilience network." },
+    { property: "og:title", content: "FloodWatch AI — India Monsoon Risk" },
+    { property: "og:description", content: "Live rainfall, flood probability, warnings, and safe-route guidance for Indore and the wider India resilience network." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ]}),
@@ -46,29 +56,140 @@ function Panel({ title, detail, children, className = "" }: { title: string; det
 }
 
 function Dashboard() {
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<Record<string, maplibregl.Marker>>({});
   const [acknowledged, setAcknowledged] = useState(false);
-  const [area, setArea] = useState("Koramangala, Bengaluru");
+  const [selectedZoneId, setSelectedZoneId] = useState("palasia");
   const [route, setRoute] = useState(false);
   const [layers, setLayers] = useState(["Flood risk", "Roads"]);
+
   const toggleLayer = (name: string) => setLayers((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
+  const activeZone = zones.find((zone) => zone.id === selectedZoneId) ?? zones[0];
+
+  const createZoneMarker = (zone: (typeof zones)[number], isSelected: boolean) => {
+    const riskColors: Record<string, string> = {
+      Critical: "#ef4444",
+      High: "#f59e0b",
+      Moderate: "#60a5fa",
+      Low: "#22c55e",
+    };
+
+    const el = document.createElement("button");
+    el.type = "button";
+    el.style.border = "none";
+    el.style.background = "transparent";
+    el.style.cursor = "pointer";
+    el.style.padding = "0";
+    el.style.display = "block";
+    el.style.font = "inherit";
+    el.style.position = "relative";
+
+    el.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; transform:translate(-50%, -50%);">
+        <span style="display:inline-block; width:${isSelected ? 15 : 12}px; height:${isSelected ? 15 : 12}px; border-radius:9999px; border:2px solid rgba(255,255,255,0.96); background:${riskColors[zone.risk as keyof typeof riskColors]}; box-shadow:${isSelected ? "0 0 0 8px rgba(239,68,68,0.15), 0 14px 26px rgba(15,23,42,0.22)" : "0 0 0 6px rgba(148,163,184,0.12), 0 10px 20px rgba(15,23,42,0.18)"};"></span>
+        <span style="display:inline-flex; align-items:center; justify-content:center; padding:5px 10px; border-radius:9999px; background:rgba(255,255,255,0.88); border:1px solid rgba(15,23,42,0.08); color:#111827; font-size:10px; font-weight:700; letter-spacing:0.04em; box-shadow:0 8px 20px rgba(15,23,42,0.12); white-space:nowrap;">${zone.name}</span>
+      </div>
+    `;
+
+    el.addEventListener("click", () => setSelectedZoneId(zone.id));
+
+    return el;
+  };
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
+      center: [75.8727, 22.7196],
+      zoom: 12.3,
+      pitch: 0,
+      antialias: true,
+      attributionControl: false,
+    });
+
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true, showZoom: true }), "top-right");
+    map.addControl(new maplibregl.ScaleControl(), "bottom-left");
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+    mapRef.current = map;
+
+    const renderMarkers = () => {
+      Object.values(markersRef.current).forEach((marker) => marker.remove());
+      markersRef.current = {};
+
+      zones.forEach((zone) => {
+        const el = createZoneMarker(zone, zone.id === selectedZoneId);
+
+        const marker = new maplibregl.Marker({
+          element: el,
+          anchor: "center",
+        })
+          .setLngLat([zone.lng, zone.lat])
+          .addTo(map);
+
+        markersRef.current[zone.id] = marker;
+      });
+    };
+
+    renderMarkers();
+
+    return () => {
+      Object.values(markersRef.current).forEach((marker) => marker.remove());
+      markersRef.current = {};
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const map = mapRef.current;
+    const zone = zones.find((item) => item.id === selectedZoneId) ?? zones[0];
+
+    Object.values(markersRef.current).forEach((marker) => marker.remove());
+    markersRef.current = {};
+
+    zones.forEach((item) => {
+      const el = createZoneMarker(item, item.id === selectedZoneId);
+
+      const marker = new maplibregl.Marker({
+        element: el,
+        anchor: "center",
+      })
+        .setLngLat([item.lng, item.lat])
+        .addTo(map);
+
+      markersRef.current[item.id] = marker;
+    });
+
+    map.flyTo({
+      center: [zone.lng, zone.lat],
+      zoom: 12.7,
+      essential: true,
+      pitch: 0,
+    });
+  }, [selectedZoneId]);
 
   return <div className="p-4 md:p-6">
     <section className="relative mb-5 overflow-hidden rounded-lg border border-border">
-      <img src={hero} alt="Aerial view of Bengaluru under heavy monsoon rain at night" width={1920} height={800} className="h-52 w-full object-cover md:h-72" />
+      <img src={hero} alt="Indore monsoon flood resilience overview across the city" width={1920} height={800} className="h-52 w-full object-cover md:h-72" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/10" />
       <div className="absolute bottom-0 left-0 max-w-2xl p-5 md:p-7">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">FloodWatch AI · Monsoon 2026</p>
-        <h2 className="mt-2 font-display text-xl font-semibold leading-tight md:text-3xl">Real-time flood intelligence for Bengaluru</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Live rainfall risk, inundation outlooks, and safe-route guidance across the city — updated every minute.</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">FloodWatch AI · India network · Indore</p>
+        <h2 className="mt-2 font-display text-xl font-semibold leading-tight md:text-5xl">Real-time flood intelligence for all India</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Live rainfall risk, waterlogging outlooks, and life-saving route guidance for Indore, with a scalable model ready for the wider national network.</p>
       </div>
     </section>
     <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-      <div><div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-critical radar-pulse" />LIVE · Updated 42 seconds ago</div><h1 className="font-display text-2xl font-semibold md:text-3xl">Flood risk overview</h1><p className="mt-1 text-sm text-muted-foreground">Bengaluru Urban District · Saturday, 26 September</p></div>
-      <label className="relative block w-full xl:w-80"><MapPin className="absolute left-3 top-2.5 size-4 text-primary" /><select value={area} onChange={(event) => setArea(event.target.value)} className="h-10 w-full appearance-none rounded-md border border-border bg-secondary pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"><option>Koramangala, Bengaluru</option><option>HSR Layout, Bengaluru</option><option>BTM Layout, Bengaluru</option></select></label>
+      <div><div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-critical radar-pulse" />LIVE · Updated 42 seconds ago</div><h1 className="font-display text-2xl font-semibold md:text-3xl">Flood risk overview</h1><p className="mt-1 text-sm text-muted-foreground">Indore, Madhya Pradesh · Sunday, 28 September</p></div>
+      <label className="relative block w-full xl:w-80"><MapPin className="absolute left-3 top-2.5 size-4 text-primary" /><select value={selectedZoneId} onChange={(event) => setSelectedZoneId(event.target.value)} className="h-10 w-full appearance-none rounded-md border border-border bg-secondary pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring">{zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.area}</option>)}</select></label>
     </div>
 
     <section className="mb-5 grid gap-4 border-l-4 border-critical bg-critical/10 p-4 md:grid-cols-[1fr_auto] md:items-center">
-      <div className="flex gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-md bg-critical text-critical-foreground"><AlertTriangle className="size-5" /></span><div><div className="text-xs font-bold uppercase text-critical">Severe flood warning · Until 19:30</div><h2 className="mt-1 font-display text-lg font-semibold">Avoid travel through Koramangala 4th Block</h2><p className="mt-1 max-w-3xl text-sm text-muted-foreground">Rapid water rise is expected within 45 minutes. Move vehicles to higher ground and keep away from storm drains.</p></div></div>
+      <div className="flex gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-md bg-critical text-critical-foreground"><AlertTriangle className="size-5" /></span><div><div className="text-xs font-bold uppercase text-critical">Severe urban flood warning · Until 19:30</div><h2 className="mt-1 font-display text-lg font-semibold">Avoid travel through {activeZone.name} and nearby low-lying drains</h2><p className="mt-1 max-w-3xl text-sm text-muted-foreground">Rapid water rise is expected within 40 minutes. Keep emergency vehicles away from low-lying crossings and move residents to elevated shelters.</p></div></div>
       <Button onClick={() => setAcknowledged(true)} variant={acknowledged ? "secondary" : "danger"}>{acknowledged ? <CheckCircle2 className="size-4" /> : null}{acknowledged ? "Acknowledged" : "Acknowledge warning"}</Button>
     </section>
 
@@ -77,14 +198,20 @@ function Dashboard() {
     </div>
 
     <div className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
-      <Panel title="Live flood intelligence" detail="Forecast overlay · 16:20 local" className="overflow-hidden">
+      <Panel title="Real-time telemetry map" detail={`Zone feed · ${activeZone.name} selected`} className="overflow-hidden">
         <div className="relative min-h-[420px] overflow-hidden bg-panel">
-          <div className="absolute inset-0 opacity-25" style={{ backgroundImage: "linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px)", backgroundSize: "36px 36px" }} />
-          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 800 440" aria-label="Flood risk map of Bengaluru"><path d="M-30 350 C120 260 170 330 295 230 S520 115 840 185" fill="none" stroke="var(--cyan)" strokeWidth="16" opacity=".5"/><path d="M0 85 L170 160 L265 130 L390 220 L520 195 L770 350" fill="none" stroke="var(--muted-foreground)" strokeWidth="4" opacity=".55"/><path d="M90 410 L150 300 L260 275 L340 150 L520 55" fill="none" stroke="var(--muted-foreground)" strokeWidth="3" opacity=".45"/><path d="M245 215 C300 145 465 145 520 230 C570 310 430 370 320 335 C245 312 205 270 245 215Z" fill="var(--critical)" opacity=".38"/><path d="M190 180 C280 80 520 90 610 225 C675 330 530 410 310 390 C145 375 92 290 190 180Z" fill="var(--warning)" opacity=".17"/></svg>
-          {[{x:"43%",y:"53%",label:"KORAMANGALA",critical:true},{x:"65%",y:"67%",label:"HSR LAYOUT",critical:false},{x:"28%",y:"70%",label:"BTM LAYOUT",critical:false}].map((pin) => <div key={pin.label} className="absolute -translate-x-1/2 -translate-y-1/2 text-center" style={{left:pin.x,top:pin.y}}><span className={`mx-auto block size-4 rounded-full border-4 ${pin.critical ? "border-critical bg-critical/40" : "border-warning bg-warning/40"}`} /><span className="mt-1 block bg-background/80 px-1.5 py-0.5 text-[9px] font-bold">{pin.label}</span></div>)}
-          <div className="absolute left-3 top-3 flex flex-col gap-2 rounded-md border border-border bg-background/90 p-2">{["Flood risk","Roads","Shelters","Hospitals"].map((layer) => <label key={layer} className="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" checked={layers.includes(layer)} onChange={() => toggleLayer(layer)} className="accent-[var(--primary)]" />{layer}</label>)}</div>
-          <Button size="icon" variant="secondary" className="absolute bottom-4 right-4" aria-label="Center map"><Crosshair className="size-4" /></Button>
-          <div className="absolute bottom-4 left-4 flex flex-wrap gap-3 rounded-md border border-border bg-background/90 px-3 py-2 text-[10px]"><span><i className="mr-1 inline-block size-2 rounded-full bg-safe" />Low</span><span><i className="mr-1 inline-block size-2 rounded-full bg-warning" />High</span><span><i className="mr-1 inline-block size-2 rounded-full bg-critical" />Critical</span></div>
+          <div ref={mapContainerRef} className="h-[420px] w-full" aria-label="MapLibre flood risk map of Indore" />
+
+          <div className="absolute left-3 top-3 flex flex-col gap-2 rounded-md border border-border bg-background/90 p-2 backdrop-blur-sm">{["Flood risk","Roads","Shelters","Hospitals"].map((layer) => <label key={layer} className="flex cursor-pointer items-center gap-2 text-xs"><input type="checkbox" checked={layers.includes(layer)} onChange={() => toggleLayer(layer)} className="accent-[var(--primary)]" />{layer}</label>)}</div>
+
+          <div className="absolute left-3 bottom-4 rounded-md border border-border bg-background/90 px-3 py-2 text-[10px] font-medium text-foreground shadow-lg backdrop-blur-sm">
+            <div className="mb-1.5 font-semibold uppercase tracking-[0.12em] text-muted-foreground">Selected area</div>
+            <div className="text-sm font-semibold text-foreground">{activeZone.name}</div>
+            <div className="mt-1 text-[10px] text-muted-foreground">{activeZone.risk} risk · {activeZone.level}</div>
+          </div>
+
+          <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded-md border border-border bg-background/90 px-3 py-2 text-[10px] font-medium text-foreground shadow-lg backdrop-blur-sm"><span className="size-2 rounded-full bg-safe animate-pulse" />Live data feed</div>
+          <div className="absolute right-4 top-3 flex flex-wrap gap-2 rounded-md border border-border bg-background/90 px-3 py-2 text-[10px] shadow-lg backdrop-blur-sm"><span><i className="mr-1 inline-block size-2 rounded-full bg-safe" />Low</span><span><i className="mr-1 inline-block size-2 rounded-full bg-warning" />High</span><span><i className="mr-1 inline-block size-2 rounded-full bg-critical" />Critical</span></div>
         </div>
       </Panel>
       <div className="grid gap-5">
@@ -95,7 +222,12 @@ function Dashboard() {
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.55fr_1fr]">
       <Panel title="Monitored zones" detail="Predicted maximum within 3 hours"><div className="overflow-x-auto"><table className="w-full min-w-[580px] text-left text-sm"><thead className="bg-secondary/60 text-[10px] uppercase text-muted-foreground"><tr><th className="px-4 py-2">Area</th><th>Risk</th><th>Flood chance</th><th>Peak depth</th><th></th></tr></thead><tbody>{zones.map((zone) => <tr key={zone.name} className="border-t border-border"><td className="px-4 py-3 font-medium">{zone.name}</td><td><span className={`rounded-sm px-2 py-1 text-[10px] font-bold ${zone.risk === "Critical" ? "bg-critical/15 text-critical" : zone.risk === "High" ? "bg-warning/15 text-warning" : zone.risk === "Moderate" ? "bg-primary/15 text-primary" : "bg-safe/15 text-safe"}`}>{zone.risk}</span></td><td>{zone.chance}</td><td>{zone.level}</td><td><Link to="/inundation" className="text-primary"><ArrowRight className="size-4" /></Link></td></tr>)}</tbody></table></div></Panel>
+      <Panel title="National network" detail="India-wide readiness index"><div className="space-y-3 p-3">{indiaNetwork.map((city) => <div key={city.region} className="flex items-center justify-between rounded-md border border-border bg-secondary/60 p-3"><div><div className="text-sm font-medium">{city.region}</div><div className="text-[11px] text-muted-foreground">{city.trend} · {city.severity} risk load</div></div><span className={`rounded-sm px-2 py-1 text-[10px] font-bold ${city.risk === "High" ? "bg-warning/15 text-warning" : city.risk === "Moderate" ? "bg-primary/15 text-primary" : "bg-safe/15 text-safe"}`}>{city.risk}</span></div>)}</div></Panel>
+    </div>
+
+    <div className="mt-5 grid gap-5 xl:grid-cols-[1.55fr_1fr]">
       <Panel title="Nearby critical services" detail="Verified availability"><div className="divide-y divide-border">{services.map(({ icon: Icon, name, meta, tone }) => <div key={name} className="flex items-center gap-3 p-4"><span className="grid size-9 place-items-center rounded-md bg-secondary"><Icon className={`size-4 ${tone}`} /></span><div><div className="text-sm font-medium">{name}</div><div className="text-xs text-muted-foreground">{meta}</div></div></div>)}</div></Panel>
+      <Panel title="Live data source" detail="Operational feed from network sensors"><div className="space-y-3 p-4 text-sm text-muted-foreground"><div className="rounded-md border border-border bg-secondary/60 p-3"><div className="font-medium text-foreground">Rain gauges</div><div className="mt-1">12 active sensors · 97.4% uptime</div></div><div className="rounded-md border border-border bg-secondary/60 p-3"><div className="font-medium text-foreground">Smart drains</div><div className="mt-1">7 of 9 channels reporting flow above threshold</div></div><div className="rounded-md border border-border bg-secondary/60 p-3"><div className="font-medium text-foreground">Evacuation command</div><div className="mt-1">3 shelters opened · 1,240 residents alerted</div></div></div></Panel>
     </div>
   </div>;
 }

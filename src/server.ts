@@ -11,8 +11,11 @@ let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
-    serverEntryPromise = import("@tanstack/react-start/server-entry").then(
-      (m) => (m.default ?? m) as ServerEntry,
+    serverEntryPromise = import("@tanstack/react-start/server-entry" as string).then(
+      (m: unknown) => {
+        const module = m as { default?: ServerEntry } & ServerEntry;
+        return (module.default ?? module) as ServerEntry;
+      },
     );
   }
   return serverEntryPromise;
