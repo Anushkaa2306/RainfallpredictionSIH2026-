@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Activity, Bell, CloudRain, Map, Mountain, Route as RouteIcon, ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
-import MoltenMetal from "./MoltenMetal";
-import { Button } from "./button";
+import MoltenMetal from "../MoltenMetal";
+import { Button } from "../ui/button";
 
 const nav = [
   { to: "/", label: "Risk overview", icon: Map },
