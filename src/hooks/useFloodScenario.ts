@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { getInundationScenario } from "../features/inundation/scenario";
+import { getInundationScenario } from "../features/inundation/inundation.utils";
 
-export function useFloodScenario(initialIndex = 3) {
+export function useFloodScenario(locationId: string, initialIndex = 0) {
   const [timeIndex, setTimeIndex] = useState(initialIndex);
-  const point = getInundationScenario(timeIndex);
+  const prediction = getInundationScenario(locationId, timeIndex);
 
-  return { timeIndex, setTimeIndex, point };
+  return { timeIndex, setTimeIndex, ...prediction };
 }

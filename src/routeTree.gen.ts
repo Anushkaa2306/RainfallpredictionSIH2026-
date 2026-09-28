@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthorityRouteImport } from './routes/authority'
+import { Route as FloodRiskRouteImport } from './routes/flood-risk'
 import { Route as InundationRouteImport } from './routes/inundation'
 import { Route as RoadIntelligenceRouteImport } from './routes/road-intelligence'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthorityRoute = AuthorityRouteImport.update({
   id: '/authority',
   path: '/authority',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FloodRiskRoute = FloodRiskRouteImport.update({
+  id: '/flood-risk',
+  path: '/flood-risk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InundationRoute = InundationRouteImport.update({
@@ -38,12 +44,14 @@ const RoadIntelligenceRoute = RoadIntelligenceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/authority': typeof AuthorityRoute
+  '/flood-risk': typeof FloodRiskRoute
   '/inundation': typeof InundationRoute
   '/road-intelligence': typeof RoadIntelligenceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/authority': typeof AuthorityRoute
+  '/flood-risk': typeof FloodRiskRoute
   '/inundation': typeof InundationRoute
   '/road-intelligence': typeof RoadIntelligenceRoute
 }
@@ -51,20 +59,29 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/authority': typeof AuthorityRoute
+  '/flood-risk': typeof FloodRiskRoute
   '/inundation': typeof InundationRoute
   '/road-intelligence': typeof RoadIntelligenceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/authority' | '/inundation' | '/road-intelligence'
+  fullPaths:
+    '/' | '/authority' | '/flood-risk' | '/inundation' | '/road-intelligence'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/authority' | '/inundation' | '/road-intelligence'
-  id: '__root__' | '/' | '/authority' | '/inundation' | '/road-intelligence'
+  to: '/' | '/authority' | '/flood-risk' | '/inundation' | '/road-intelligence'
+  id:
+    | '__root__'
+    | '/'
+    | '/authority'
+    | '/flood-risk'
+    | '/inundation'
+    | '/road-intelligence'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthorityRoute: typeof AuthorityRoute
+  FloodRiskRoute: typeof FloodRiskRoute
   InundationRoute: typeof InundationRoute
   RoadIntelligenceRoute: typeof RoadIntelligenceRoute
 }
@@ -83,6 +100,13 @@ declare module '@tanstack/react-router' {
       path: '/authority'
       fullPath: '/authority'
       preLoaderRoute: typeof AuthorityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flood-risk': {
+      id: '/flood-risk'
+      path: '/flood-risk'
+      fullPath: '/flood-risk'
+      preLoaderRoute: typeof FloodRiskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inundation': {
@@ -105,6 +129,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthorityRoute: AuthorityRoute,
+  FloodRiskRoute: FloodRiskRoute,
   InundationRoute: InundationRoute,
   RoadIntelligenceRoute: RoadIntelligenceRoute,
 }

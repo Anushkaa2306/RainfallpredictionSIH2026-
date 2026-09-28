@@ -1,9 +1,10 @@
 import { TerrainScene } from "../../components/map/terrain-scene";
+import type { InundationFrame } from "./inundation.types";
 
-export function InundationMap({ level }: { level: number }) {
+export function InundationMap({ frame }: { frame: InundationFrame }) {
   return (
-    <div className="relative h-[55vh] min-h-[430px]">
-      <TerrainScene level={level} />
+    <div className="absolute inset-0">
+      <TerrainScene depthGrid={frame.depthGrid} />
     </div>
   );
 }

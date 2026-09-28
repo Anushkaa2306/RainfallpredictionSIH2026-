@@ -16,11 +16,18 @@ export function RiskDrivers({ drivers = [] }: { drivers?: RiskDriver[] }) {
           key={driver.label}
           className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0"
         >
-          <div>
+          <div className="min-w-0">
             <div className="text-sm font-medium">{driver.label}</div>
-            <div className="text-xs text-muted-foreground">{driver.detail}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">{driver.detail}</div>
           </div>
-          <span className="shrink-0 text-sm font-semibold">{driver.value}</span>
+          <div className="shrink-0 text-right">
+            <div className="text-xs font-semibold">{driver.value}</div>
+            <div
+              className={`mt-1 text-[9px] uppercase ${driver.state === "demo" ? "text-warning" : "text-muted-foreground"}`}
+            >
+              {driver.state === "demo" ? "Demo input" : "Unavailable"}
+            </div>
+          </div>
         </li>
       ))}
     </ul>
