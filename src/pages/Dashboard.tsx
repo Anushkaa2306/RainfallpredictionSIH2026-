@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Hospital, MapPin, Navigation, ShieldCheck } from "lucide-react";
+import { ArrowRight, Hospital, MapPin } from "lucide-react";
 import { useState } from "react";
-import { Button } from "../components/ui/button";
 import { CriticalServices } from "../components/emergency/CriticalServices";
 import { Panel } from "../components/dashboard/Panel";
 import { FloodRiskMap } from "../components/map/FloodRiskMap";
@@ -13,6 +12,10 @@ import { useMapLayers } from "../hooks/useMapLayers";
 import { useRiskPrediction } from "../hooks/useRiskPrediction";
 import { useSafeRoute } from "../hooks/useSafeRoute";
 import { getSafeRoute } from "../services/routeApi";
+import { RoutePlanner } from "../features/safe-routes/RoutePlanner";
+import { FloodProbability } from "../features/flood-risk/FloodProbability";
+import { RiskLevel } from "../features/flood-risk/RiskLevel";
+import { RiskDrivers } from "../features/flood-risk/RiskDrivers";
 
 export function Dashboard() {
   const [acknowledged, setAcknowledged] = useState(false);
@@ -60,15 +63,12 @@ export function Dashboard() {
           <div className="absolute right-4 top-3 flex flex-wrap gap-2 rounded-md border border-border bg-background/90 px-3 py-2 text-[10px] shadow-lg backdrop-blur-sm"><span><i className="mr-1 inline-block size-2 rounded-full bg-safe" />Low</span><span><i className="mr-1 inline-block size-2 rounded-full bg-warning" />High</span><span><i className="mr-1 inline-block size-2 rounded-full bg-critical" />Critical</span></div>
         </div>
       </Panel>
-      <div className="grid gap-5">
-        <RainfallOutlook />
-        <Panel title="Get to safety" detail="Routes avoid flooded and low-lying roads"><div className="p-4"><div className="mb-3 flex gap-2"><Button className="flex-1" onClick={findSafeRoute}><Navigation className="size-4" />Find safe route</Button><Button variant="secondary" size="icon" aria-label="Emergency services"><Hospital className="size-4" /></Button></div>{routeReady ? <div className="rounded-md border border-safe/40 bg-safe/10 p-3"><div className="flex items-center gap-2 text-sm font-semibold text-safe"><ShieldCheck className="size-4" />Route ready · {safeRoute.duration}</div><p className="mt-1 text-xs text-muted-foreground">{safeRoute.directions}</p></div> : <p className="text-xs text-muted-foreground">Your nearest open shelter is {safeRoute.nearestShelter}, {safeRoute.distance} away.</p>}</div></Panel>
-      </div>
+      <div className="grid gap-5"><RainfallOutlook /><RoutePlanner route={safeRoute} ready={routeReady} onFindRoute={findSafeRoute} /></div>
     </div>
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.55fr_1fr]">
-      <Panel title="Monitored zones" detail="Predicted maximum within 3 hours"><div className="overflow-x-auto"><table className="w-full min-w-[580px] text-left text-sm"><thead className="bg-secondary/60 text-[10px] uppercase text-muted-foreground"><tr><th className="px-4 py-2">Area</th><th>Risk</th><th>Flood chance</th><th>Peak depth</th><th></th></tr></thead><tbody>{zones.map((zone) => <tr key={zone.name} className="border-t border-border"><td className="px-4 py-3 font-medium">{zone.name}</td><td><span className={`rounded-sm px-2 py-1 text-[10px] font-bold ${zone.risk === "Critical" ? "bg-critical/15 text-critical" : zone.risk === "High" ? "bg-warning/15 text-warning" : zone.risk === "Moderate" ? "bg-primary/15 text-primary" : "bg-safe/15 text-safe"}`}>{zone.risk}</span></td><td>{zone.chance}</td><td>{zone.level}</td><td><Link to="/inundation" className="text-primary"><ArrowRight className="size-4" /></Link></td></tr>)}</tbody></table></div></Panel>
-      <Panel title="National network" detail="India-wide readiness index"><div className="space-y-3 p-3">{indiaNetwork.map((city) => <div key={city.region} className="flex items-center justify-between rounded-md border border-border bg-secondary/60 p-3"><div><div className="text-sm font-medium">{city.region}</div><div className="text-[11px] text-muted-foreground">{city.trend} · {city.severity} risk load</div></div><span className={`rounded-sm px-2 py-1 text-[10px] font-bold ${city.risk === "High" ? "bg-warning/15 text-warning" : city.risk === "Moderate" ? "bg-primary/15 text-primary" : "bg-safe/15 text-safe"}`}>{city.risk}</span></div>)}</div></Panel>
+      <Panel title="Monitored zones" detail="Predicted maximum within 3 hours"><div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left text-sm"><thead className="bg-secondary/60 text-[10px] uppercase text-muted-foreground"><tr><th className="px-4 py-2">Area</th><th>Risk</th><th>Flood chance</th><th>Peak depth</th><th></th></tr></thead><tbody>{zones.map((zone) => <tr key={zone.name} className="border-t border-border"><td className="px-4 py-3 font-medium">{zone.name}</td><td><RiskLevel risk={zone.risk} /></td><td><FloodProbability probability={Number.parseInt(zone.chance, 10)} /></td><td>{zone.level}</td><td><Link to="/inundation" className="text-primary"><ArrowRight className="size-4" /></Link></td></tr>)}</tbody></table></div></Panel>
+      <div className="grid content-start gap-5"><Panel title="National network" detail="India-wide readiness index"><div className="space-y-3 p-3">{indiaNetwork.map((city) => <div key={city.region} className="flex items-center justify-between rounded-md border border-border bg-secondary/60 p-3"><div><div className="text-sm font-medium">{city.region}</div><div className="text-[11px] text-muted-foreground">{city.trend} · {city.severity} risk load</div></div><span className={`rounded-sm px-2 py-1 text-[10px] font-bold ${city.risk === "High" ? "bg-warning/15 text-warning" : city.risk === "Moderate" ? "bg-primary/15 text-primary" : "bg-safe/15 text-safe"}`}>{city.risk}</span></div>)}</div></Panel><Panel title="Risk drivers" detail="Model feature attribution"><div className="p-4"><RiskDrivers /></div></Panel></div>
     </div>
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.55fr_1fr]">

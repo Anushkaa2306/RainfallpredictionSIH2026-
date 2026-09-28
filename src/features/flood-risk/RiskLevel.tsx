@@ -8,5 +8,9 @@ const riskStyles: Record<FloodRisk, string> = {
 };
 
 export function RiskLevel({ risk }: { risk: FloodRisk }) {
-  return <span className={`inline-flex rounded-sm px-2 py-1 text-[10px] font-bold ${riskStyles[risk]}`}>{risk}</span>;
+  return (
+    <span className={`inline-flex rounded-sm px-2 py-1 text-[10px] font-bold ${riskStyles[risk]}`}>
+      {risk}
+    </span>
+  );
 }

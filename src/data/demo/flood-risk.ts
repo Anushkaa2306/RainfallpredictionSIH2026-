@@ -1,4 +1,5 @@
 import { CloudRain, Droplets, Waves, Wind } from "lucide-react";
+import type { FloodRiskZone } from "../../features/flood-risk/risk.types";
 
 export const metrics = [
   { icon: CloudRain, label: "Rainfall now", value: "38", unit: "mm/hr", note: "↑ 14 in 30 min", tone: "text-primary" },
@@ -14,7 +15,7 @@ export const indiaNetwork = [
   { region: "Mumbai", risk: "Low", severity: "0.8x", trend: "Recovering" },
 ];
 
-export const zones = [
+export const zones: FloodRiskZone[] = [
   { id: "palasia", name: "Palasia", risk: "Critical", chance: "82%", level: "1.3 m", area: "Palasia, Indore", lng: 75.8712, lat: 22.7207 },
   { id: "vijay-nagar", name: "Vijay Nagar", risk: "High", chance: "71%", level: "0.9 m", area: "Vijay Nagar, Indore", lng: 75.8954, lat: 22.7549 },
   { id: "rajwada", name: "Rajwada", risk: "Moderate", chance: "49%", level: "0.5 m", area: "Rajwada, Indore", lng: 75.8756, lat: 22.7173 },

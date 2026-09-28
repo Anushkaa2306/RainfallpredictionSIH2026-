@@ -1,6 +1,1 @@
-export type SafeRoute = {
-  duration: string;
-  directions: string;
-  nearestShelter: string;
-  distance: string;
-};
+export type { SafeRoute } from "./route.types";
