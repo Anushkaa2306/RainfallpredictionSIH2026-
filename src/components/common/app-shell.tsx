@@ -56,7 +56,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <CloudRain className="size-5" />
             </span>
             <span className="min-w-0">
-              <strong className="block truncate font-display text-sm">Varshaa</strong>
+              <strong className="block truncate font-sans text-3xl font-bold leading-none">
+                Varshaa
+              </strong>
               <span className="block text-[10px] uppercase text-muted-foreground">
                 Urban resilience network
               </span>
